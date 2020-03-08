@@ -15,6 +15,7 @@ using AspNetCore.Identity.DocumentDb;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents;
 using System.Net;
+using Microsoft.Extensions.Hosting;
 
 namespace IdentitySample
 {
@@ -26,7 +27,7 @@ namespace IdentitySample
 
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
@@ -66,7 +67,7 @@ namespace IdentitySample
                     options.Database = "AspNetCoreIdentitySample";
                 });
 
-            services.AddMvc();
+            services.AddMvc(option =>  option.EnableEndpointRouting = false);
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -74,10 +75,10 @@ namespace IdentitySample
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            //loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            //loggerFactory.AddDebug();
 
             if (env.IsDevelopment())
             {
