@@ -20,6 +20,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    projects: '**/AspNetCore.Identity.DocumentDb.csproj'
 
 - task: DotNetCoreCLI@2
   inputs:
