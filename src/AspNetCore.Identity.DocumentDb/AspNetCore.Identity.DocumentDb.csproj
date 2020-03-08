@@ -2,22 +2,20 @@
 
   <PropertyGroup>
     <Description>A Cosmos DB / DocumentDB Storage Provider for ASP.NET Core Identity</Description>
-    <Copyright>2016-2017 Bernhard Koenig</Copyright>
+    <Copyright></Copyright>
     <AssemblyTitle>CodeKoenig.AspNetCore.Identity.DocumentDb</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <Authors>Bernhard Koenig</Authors>
+    <Authors></Authors>
     <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <AssemblyName>CodeKoenig.AspNetCore.Identity.DocumentDb</AssemblyName>
-    <PackageId>CodeKoenig.AspNetCore.Identity.DocumentDb</PackageId>
+    <PackageId>Ineaweb.AspNetCore.Identity.DocumentDb</PackageId>
     <PackageTags>DocumentDB;Cosmos DB;CosmosDB;AspNetCore;AspNet;Membership;Identity;Core;AspNetCore.Identity.DocumentDb</PackageTags>
-    <PackageReleaseNotes>
-      Now supports .NET Core 2.0 and NETStandard 2.0 two factor authentication. Thanks to @louislewis2 and @Carl-Hugo for their contributions.
-    </PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/codekoenig/AspNetCore.Identity.DocumentDb</PackageProjectUrl>
+    <PackageReleaseNotes>Now supports .NET Core 3.1 and NETStandard 2.1 two factor authentication.</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/ineaweb/AspNetCore.Identity.DocumentDb</PackageProjectUrl>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <PackageIconUrl>https://github.com/codekoenig/AspNetCore.Identity.DocumentDb/raw/master/Assets/CoreDocDbIdentityIcon256.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/codekoenig/AspNetCore.Identity.DocumentDb</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ineaweb/AspNetCore.Identity.DocumentDb</RepositoryUrl>
     <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.6' ">1.6.1</NetStandardImplicitPackageVersion>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -35,5 +33,7 @@
 
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);NETSTANDARD21</DefineConstants>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>3.1.0</Version>
   </PropertyGroup>
 </Project>
