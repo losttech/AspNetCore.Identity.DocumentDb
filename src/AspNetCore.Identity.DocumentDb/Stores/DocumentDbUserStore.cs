@@ -105,7 +105,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             try
             {
-                await documentClient.DeleteDocumentAsync(GenerateDocumentUri(user.NormalizedEmail));
+                await documentClient.DeleteDocumentAsync(GenerateDocumentUri(user.NormalizedEmail), new RequestOptions { PartitionKey = new PartitionKey(user.NormalizedEmail) });
             }
             catch (DocumentClientException dce)
             {
@@ -130,7 +130,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(GenerateDocumentUri(userId));
+            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(GenerateDocumentUri(userId), new RequestOptions { PartitionKey = new PartitionKey(userId) });
 
             return foundUser;
         }
