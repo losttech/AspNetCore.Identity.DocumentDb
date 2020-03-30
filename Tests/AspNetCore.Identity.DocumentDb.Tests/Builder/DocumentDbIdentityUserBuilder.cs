@@ -33,22 +33,13 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 
             return new DocumentDbIdentityUserBuilder(new DocumentDbIdentityUser()
             {
-                UserName = userName,
-                Email = userName
+                NormalizedEmail = userName,
             });
         }
 
         public DocumentDbIdentityUserBuilder WithId(string id = null)
         {
-            identityUser.Id = id ?? Guid.NewGuid().ToString().ToUpper();
-            return this;
-        }
-
-        public DocumentDbIdentityUserBuilder WithNormalizedUserName()
-        {
-            LookupNormalizer normalizer = new LookupNormalizer();
-
-            identityUser.NormalizedUserName = normalizer.Normalize(identityUser.UserName);
+            identityUser.NormalizedEmail = id ?? Guid.NewGuid().ToString().ToUpper();
             return this;
         }
 
@@ -99,14 +90,6 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
                 identityUser.Roles.Add(role);
             }
 
-            return this;
-        }
-
-        public DocumentDbIdentityUserBuilder WithNormalizedEmail()
-        {
-            LookupNormalizer normalizer = new LookupNormalizer();
-
-            identityUser.NormalizedEmail = normalizer.Normalize(identityUser.Email);
             return this;
         }
 

@@ -21,17 +21,6 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             this.collectionUri = UriFactory.CreateDocumentCollectionUri(this.documentDbFixture.Database, this.documentDbFixture.UserStoreDocumentCollection);
         }
 
-        [Fact]
-        public async Task ShouldSetNormalizedUserName()
-        {
-            DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithNormalizedUserName();
-            DocumentDbUserStore<DocumentDbIdentityUser> store = CreateUserStore();
-
-            string normalizedUserName = Guid.NewGuid().ToString();
-            await store.SetNormalizedUserNameAsync(user, normalizedUserName, CancellationToken.None);
-
-            Assert.Equal(normalizedUserName, user.NormalizedUserName);
-        }
 
         [Fact]
         public async Task ShouldReturnAllUsersWithAdminRoleClaim()
@@ -56,9 +45,9 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             
             Assert.Collection(
                 adminUsers,
-                u => u.Id.Equals(firstAdmin.Id),
-                u => u.Id.Equals(secondAdmin.Id),
-                u => u.Id.Equals(thirdAdmin.Id));
+                u => u.NormalizedEmail.Equals(firstAdmin.NormalizedEmail),
+                u => u.NormalizedEmail.Equals(secondAdmin.NormalizedEmail),
+                u => u.NormalizedEmail.Equals(thirdAdmin.NormalizedEmail));
         }
 
         [Fact]
@@ -74,7 +63,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await store.FindByLoginAsync(targetLogin.LoginProvider, targetLogin.ProviderKey, CancellationToken.None);
 
-            Assert.Equal(targetUser.Id, foundUser.Id);
+            Assert.Equal(targetUser.NormalizedEmail, foundUser.NormalizedEmail);
         }
 
         [Fact]
@@ -84,9 +73,9 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             DocumentDbUserStore<DocumentDbIdentityUser> store = CreateUserStore();
 
-            DocumentDbIdentityUser<DocumentDbIdentityRole> firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName().AddRole(adminRole).AddRole();
-            DocumentDbIdentityUser<DocumentDbIdentityRole> secondAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName().AddRole(adminRole).AddRole().AddRole();
-            DocumentDbIdentityUser<DocumentDbIdentityRole> thirdAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName().AddRole(adminRole);
+            DocumentDbIdentityUser<DocumentDbIdentityRole> firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(adminRole).AddRole();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> secondAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(adminRole).AddRole().AddRole();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> thirdAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(adminRole);
 
             CreateDocument(firstAdmin);
             CreateDocument(secondAdmin);
@@ -100,9 +89,9 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             Assert.Collection(
                 adminUsers,
-                u => u.Id.Equals(firstAdmin.Id),
-                u => u.Id.Equals(secondAdmin.Id),
-                u => u.Id.Equals(thirdAdmin.Id));
+                u => u.NormalizedEmail.Equals(firstAdmin.NormalizedEmail),
+                u => u.NormalizedEmail.Equals(secondAdmin.NormalizedEmail),
+                u => u.NormalizedEmail.Equals(thirdAdmin.NormalizedEmail));
         }
 
         [Fact]
@@ -110,7 +99,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             DocumentDbIdentityRole adminRole = DocumentDbIdentityRoleBuilder.Create().WithNormalizedRoleName();
             DocumentDbUserStore<DocumentDbIdentityUser> store = CreateUserStore();
-            DocumentDbIdentityUser<DocumentDbIdentityRole> firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName().AddRole(adminRole).AddRole();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(adminRole).AddRole();
 
             CreateDocument(firstAdmin);
             CreateDocument(DocumentDbIdentityUserBuilder.Create().AddRole().AddRole());
@@ -124,7 +113,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         public async Task ShouldReturnUserBySpecificEmail()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = CreateUserStore();
-            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId();
 
             CreateDocument(DocumentDbIdentityUserBuilder.Create());
             CreateDocument(targetUser);
@@ -133,7 +122,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await store.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None);
 
-            Assert.Equal(targetUser.Id, foundUser.Id);
+            Assert.Equal(targetUser.NormalizedEmail, foundUser.NormalizedEmail);
         }
 
         [Theory]
@@ -283,32 +272,32 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         public async Task ShouldReturnUserByUserName()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> userStore = CreateUserStore();
-            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId();
 
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
             CreateDocument(targetUser);
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
 
-            DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await userStore.FindByNameAsync(targetUser.NormalizedUserName, CancellationToken.None);
+            DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await userStore.FindByNameAsync(targetUser.NormalizedEmail, CancellationToken.None);
 
-            Assert.Equal(targetUser.Id, foundUser.Id);
+            Assert.Equal(targetUser.NormalizedEmail, foundUser.NormalizedEmail);
         }
 
         [Fact]
         public async Task ShouldReturnUserByEmail()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> userStore = CreateUserStore();
-            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId();
 
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
             CreateDocument(targetUser);
-            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId());
 
             DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await userStore.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None);
 
-            Assert.Equal(targetUser.Id, foundUser.Id);
+            Assert.Equal(targetUser.NormalizedEmail, foundUser.NormalizedEmail);
         }
 
 #if (NETCORE2 || NETCORE3)

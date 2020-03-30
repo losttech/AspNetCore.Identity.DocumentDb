@@ -81,9 +81,9 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             // If no UserId was supplied, generate a GUID
-            if (string.IsNullOrEmpty(user.Id))
+            if (string.IsNullOrEmpty(user.NormalizedEmail))
             {
-                user.Id = Guid.NewGuid().ToString();
+                user.NormalizedEmail = Guid.NewGuid().ToString();
             }
 
             ResourceResponse<Document> result = await documentClient.CreateDocumentAsync(collectionUri, user);
@@ -105,7 +105,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             try
             {
-                await documentClient.DeleteDocumentAsync(GenerateDocumentUri(user.Id));
+                await documentClient.DeleteDocumentAsync(GenerateDocumentUri(user.NormalizedEmail));
             }
             catch (DocumentClientException dce)
             {
@@ -146,7 +146,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             TUser foundUser = documentClient.CreateDocumentQuery<TUser>(collectionUri)
-                .Where(u => u.NormalizedUserName == normalizedUserName && u.DocumentType == typeof(TUser).Name)
+                .Where(u => u.NormalizedEmail == normalizedUserName && u.DocumentType == typeof(TUser).Name)
                 .AsEnumerable()
                 .FirstOrDefault();
 
@@ -163,7 +163,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.NormalizedUserName);
+            return Task.FromResult(user.NormalizedEmail);
         }
 
         public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
@@ -176,7 +176,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.Id);
+            return Task.FromResult(user.NormalizedEmail);
         }
 
         public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
@@ -189,48 +189,42 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.UserName);
+            return Task.FromResult(user.NormalizedEmail);
+        }
+
+        Task SetIdentifier(TUser user, string identifier, string propertyName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (identifier == null)
+            {
+                throw new ArgumentNullException(propertyName);
+            }
+
+            if (user.NormalizedEmail is null)
+            {
+                user.NormalizedEmail = identifier;
+            }
+            else if (user.NormalizedEmail != identifier)
+            {
+                throw new NotSupportedException("With CosmosDB all forms of user identifier must be the same");
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            if (normalizedName == null)
-            {
-                throw new ArgumentNullException(nameof(normalizedName));
-            }
-
-            user.NormalizedUserName = normalizedName;
-
-            return Task.CompletedTask;
-        }
+            => this.SetIdentifier(user, normalizedName, nameof(normalizedName), cancellationToken);
 
         public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            if (userName == null)
-            {
-                throw new ArgumentNullException(nameof(userName));
-            }
-
-            user.UserName = userName;
-
-            return Task.CompletedTask;
-        }
+            => this.SetIdentifier(user, userName, nameof(userName), cancellationToken);
 
         public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
@@ -244,7 +238,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             try
             {
-                await documentClient.ReplaceDocumentAsync(GenerateDocumentUri(user.Id), document: user);
+                await documentClient.ReplaceDocumentAsync(GenerateDocumentUri(user.NormalizedEmail), document: user);
             }
             catch (DocumentClientException dce)
             {
@@ -719,19 +713,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         }
 
         public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            user.Email = email;
-
-            return Task.FromResult(user.Email);
-        }
+            => this.SetIdentifier(user, email, propertyName: nameof(email), cancellationToken);
 
         public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
         {
@@ -743,7 +725,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(user.Email);
+            return Task.FromResult(user.NormalizedEmail);
         }
 
         public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
@@ -771,7 +753,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             user.IsEmailConfirmed = confirmed;
 
-            return Task.FromResult(user.Email);
+            return Task.FromResult(confirmed);
         }
 
         public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
@@ -806,19 +788,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         }
 
         public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            user.NormalizedEmail = normalizedEmail;
-
-            return Task.FromResult(user.Email);
-        }
+            => this.SetIdentifier(user, normalizedEmail, propertyName: nameof(normalizedEmail), cancellationToken);
 
         public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken)
         {

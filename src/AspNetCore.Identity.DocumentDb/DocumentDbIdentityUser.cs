@@ -28,18 +28,6 @@ namespace AspNetCore.Identity.DocumentDb
         }
 
         [JsonProperty(PropertyName = "id")]
-        public string Id { get; set; }
-
-        [JsonProperty(PropertyName = "userName")]
-        public string UserName { get; set; }
-
-        [JsonProperty(PropertyName = "email")]
-        public string Email { get; set; }
-
-        [JsonProperty(PropertyName = "normalizedUserName")]
-        public string NormalizedUserName { get; set; }
-
-        [JsonProperty(PropertyName = "normalizedEmail")]
         public string NormalizedEmail { get; set; }
 
         [JsonProperty(PropertyName = "isEmailConfirmed")]
